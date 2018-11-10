@@ -1,9 +1,6 @@
 require "json"
 require "net/http"
 require "date"
-require "clockwork"
-require "active_support/all"
-require "pry"
 require_relative "slack"
 
 class Seminar
@@ -55,12 +52,3 @@ class Seminar
     (1..7).map{ |day| (today + day).to_s.gsub("-","") }.join(",")
   end
 end
-
-include Clockwork
-
-handler do |job|
-  Seminar.new.get_connpass_info
-end
-
-# every(1.day, 'notify_job', :at => '23:00')
-every(1.minute, 'notify_slack.job')
