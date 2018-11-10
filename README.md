@@ -7,7 +7,7 @@ $ vim ~/.bash_profile
 # ~/.bash_profile
 export SLACK_BOT_TOKEN=YOUR_TOKEN
 export SLACK_BOT_CHANNEL=TARGET_CHANNEL
-export SLACK_MY_USER_ID="YOUR_SLACK_USER_ID"
+export SLACK_MY_USER_ID=YOUR_SLACK_USER_ID
 ```
 ```bash
 $ source ~/.bash_profile
