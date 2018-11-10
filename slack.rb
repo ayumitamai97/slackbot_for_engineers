@@ -4,8 +4,7 @@ module Slack
       URI.parse('https://slack.com/api/chat.postMessage'),
       {
         "token" => ENV["SLACK_BOT_TOKEN"],
-        # "channel"=> ENV["SLACK_BOT_CHANNEL"],
-        "channel"=> "DDDV4897G", # テスト用
+        "channel"=> ENV["SLACK_BOT_CHANNEL"],
         "text"=> text
       })
   end

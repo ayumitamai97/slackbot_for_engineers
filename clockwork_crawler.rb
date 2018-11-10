@@ -8,5 +8,4 @@ handler do |job|
   Seminar.new.get_connpass_info
 end
 
-# every(1.day, 'notify_slack', :at => '23:00')
-every(1.minute, 'notify_slack')
+every(1.day, 'notify_slack', :at => '23:00')
