@@ -1,10 +1,16 @@
 # Usage
 ## Setting Environment Variables
-```
+```bash
 $ vim ~/.bash_profile
+```
+```
+# ~/.bash_profile
 export SLACK_BOT_TOKEN=YOUR_TOKEN
 export SLACK_BOT_CHANNEL=TARGET_CHANNEL
 export SLACK_MY_USER_ID="YOUR_SLACK_USER_ID"
+```
+```bash
+$ source ~/.bash_profile
 ```
 * `YOUR_TOKEN` should be look like this:  
 `abab-123456789012-345678901234-1AbCDEf2ghi3JK345`
@@ -19,7 +25,7 @@ export SLACK_MY_USER_ID="YOUR_SLACK_USER_ID"
 
 ## Execution
 ### Command
-```
+```bash
 $ clockwork clockwork_crawler.rb
 ```
 ### Change Execution Schedule
