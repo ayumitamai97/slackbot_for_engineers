@@ -4,27 +4,16 @@ require "date"
 require "clockwork"
 require "active_support/all"
 require "pry"
-
-class Slack
-  def post(text)
-    Net::HTTP.post_form(
-      URI.parse('https://slack.com/api/chat.postMessage'),
-      {
-        "token" => ENV["SLACK_BOT_TOKEN"],
-        # "channel"=> ENV["SLACK_BOT_CHANNEL"],
-        "channel"=> "DDDV4897G", # テスト用
-        "text"=> text
-      })
-  end
-end
+require_relative "slack"
 
 class Seminar
+  include Slack
+
   REGIONS = %w(東京 大阪 福岡)
   SEARCH_START_POSITIONS = %w(1 101).freeze
   def get_connpass_info
     REGIONS.each do |region|
-      slack = Slack.new
-      slack.post("#{region}で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face:")
+      post_message("#{region}で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face:")
 
       SEARCH_START_POSITIONS.each do |position|
         encoded_uri =
@@ -32,7 +21,7 @@ class Seminar
 
         uri = URI.parse(encoded_uri)
         json = JSON.parse Net::HTTP.get_response(uri).body
-        notify_slack(json: json, slack: slack)
+        notify_slack(json: json)
       end
     end
   end
@@ -42,12 +31,12 @@ class Seminar
   end
 
   private
-  def notify_slack(json:, slack:)
+  def notify_slack(json:)
     events = json["events"]
     events.each do |event|
       parse_connpass_info(event)
       next if @waiting_count > 0 || @limit_count == 0
-      slack.post("*" + @event_title + "* by " + @event_owner + "\n" + @event_url)
+      post_message("*" + @event_title + "* by " + @event_owner + "\n" + @event_url)
     end
   end
 
@@ -73,4 +62,5 @@ handler do |job|
   Seminar.new.get_connpass_info
 end
 
-every(1.day, 'notify_slack.job', :at => '23:00')
+# every(1.day, 'notify_job', :at => '23:00')
+every(1.minute, 'notify_slack.job')
