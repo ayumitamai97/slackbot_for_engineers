@@ -10,7 +10,7 @@ class Seminar
   SEARCH_START_POSITIONS = %w(1 101).freeze
   def get_connpass_info
     REGIONS.each do |region|
-      post_message("#{region}で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face:")
+      post_message(region + "で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face:")
 
       SEARCH_START_POSITIONS.each do |position|
         encoded_uri =
@@ -21,6 +21,10 @@ class Seminar
         notify_slack(json: json)
       end
     end
+
+    # ENV["SLACK_MY_USER_ID"] のフォーマットは <@ABCDEFG12>
+    # Slack User ID はこれで確認できる: https://slack.com/api/users.list?token=YOUR_TOKEN
+    post_message("ご意見・ご感想は " + ENV["SLACK_MY_USER_ID"] + " まで :raised_hands:")
   end
 
   def get_spzcolab_info
@@ -30,11 +34,15 @@ class Seminar
   private
   def notify_slack(json:)
     events = json["events"]
+    post_count = 0
     events.each do |event|
       parse_connpass_info(event)
       next if @waiting_count > 0 || @limit_count == 0
+      next if @accepted_count / @limit_count < 0.8
       post_message("*" + @event_title + "* by " + @event_owner + "\n" + @event_url)
+      post_count += 1
     end
+    post_message("該当のイベントはありませんでした…。") if @post_count == 0
   end
 
   def parse_connpass_info(event)
