@@ -28,6 +28,10 @@ $ source ~/.bash_profile
 ```bash
 $ clockwork clockwork_crawler.rb
 ```
+If you run it in an AWS EC2 instance and so on,
+```bash
+$ nohup clockwork clockwork_crawker.rb &
+```
 ### Change Execution Schedule
 https://github.com/adamwiggins/clockwork#quickstart
 
