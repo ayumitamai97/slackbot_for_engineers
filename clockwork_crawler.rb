@@ -4,8 +4,4 @@ require_relative "seminar"
 
 include Clockwork
 
-handler do |job|
-  Seminar.new.get_connpass_info
-end
-
-every(1.day, 'notify_slack', :at => '23:00')
+every(1.day, 'notify_slack', :at => '23:00') { Seminar.new.get_connpass_info }
