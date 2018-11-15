@@ -2,7 +2,6 @@ require "json"
 require "net/http"
 require "date"
 require_relative "slack"
-require "pry"
 
 class Seminar
   include Slack
