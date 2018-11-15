@@ -10,7 +10,7 @@ class Seminar
   SEARCH_START_POSITIONS = %w(1 101).freeze
   def get_connpass_info
     REGIONS.each do |region|
-      post_message(region + "で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face:")
+      @message = region + "で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face: \n"
 
       SEARCH_START_POSITIONS.each do |position|
         encoded_uri =
@@ -18,7 +18,7 @@ class Seminar
 
         uri = URI.parse(encoded_uri)
         json = JSON.parse Net::HTTP.get_response(uri).body
-        notify_slack(json: json)
+        notify_slack(json: json, message: @message, position: position)
       end
     end
 
@@ -32,17 +32,22 @@ class Seminar
   end
 
   private
-  def notify_slack(json:)
+  def notify_slack(json:, message:, position:)
     events = json["events"]
-    post_count = 0
+    @post_count = 0
+    @message = search_from_most_recent?(position) ? message : ""
+
     events.each do |event|
       parse_connpass_info(event)
       next if @waiting_count > 0 || @limit_count == 0
       next if @accepted_count / @limit_count < 0.8
-      post_message("*" + @event_title + "* by " + @event_owner + "\n" + @event_url)
-      post_count += 1
+      @post_count += 1
+      @message += "*" + @event_title + "* by " + @event_owner + "\n" + @event_url + "\n"
     end
-    post_message("該当のイベントはありませんでした…。") if @post_count == 0
+
+    @message += "該当のイベントはありませんでした…。" if
+      @post_count == 0 && search_from_most_recent?(position)
+    post_message(@message)
   end
 
   def parse_connpass_info(event)
@@ -58,5 +63,9 @@ class Seminar
   def dates
     today = Date.today
     (1..7).map{ |day| (today + day).to_s.gsub("-","") }.join(",")
+  end
+
+  def search_from_most_recent?(position)
+    position == 1
   end
 end
