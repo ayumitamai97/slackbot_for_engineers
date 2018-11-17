@@ -1,25 +1,23 @@
 require "json"
 require "net/http"
 require "date"
+require "pry"
 require_relative "slack"
 
 class Seminar
   include Slack
-
   REGIONS = %w(東京 大阪 福岡)
-  SEARCH_START_POSITIONS = %w(1 101).freeze
+
   def get_connpass_info
     REGIONS.each do |region|
-      @message = region + "で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face: \n"
+      @message = region + "で1週間以内に開催される、人気(残席3割未満)のイベントをお知らせします :full_moon_with_face: \n"
 
-      SEARCH_START_POSITIONS.each do |position|
-        encoded_uri =
-          URI.encode("https://connpass.com/api/v1/event/?keyword=#{region}&ymd=#{dates}&count=100&start=#{position}")
+      encoded_uri =
+        URI.encode("https://connpass.com/api/v1/event/?keyword=#{region}&ymd=#{dates}&count=100&order=2")
 
-        uri = URI.parse(encoded_uri)
-        json = JSON.parse Net::HTTP.get_response(uri).body
-        notify_slack(json: json, message: @message, position: position)
-      end
+      uri = URI.parse(encoded_uri)
+      json = JSON.parse Net::HTTP.get_response(uri).body
+      notify_slack(json: json, message: @message)
     end
 
     # ENV["SLACK_MY_USER_ID"] のフォーマットは <@ABCDEFG12>
@@ -32,21 +30,23 @@ class Seminar
   end
 
   private
-  def notify_slack(json:, message:, position:)
+
+  def notify_slack(json:, message:)
     events = json["events"]
     @post_count = 0
-    @message = search_from_most_recent?(position) ? message : ""
 
     events.each do |event|
       parse_connpass_info(event)
-      next if @waiting_count >= 0 || @limit_count == 0
-      next if @accepted_count / @limit_count < 0.8
+
+      next if invalid_limit?(limit: @limit_count)
+      # binding.pry
+      next if too_popular_or_unpopular?(accepted: @accepted_count, limit: @limit_count)
+
       @post_count += 1
       @message += "*" + @event_title + "* by " + @event_owner + "\n" + @event_url + "\n"
     end
 
-    @message += "該当のイベントはありませんでした…。" if
-      @post_count == 0 && search_from_most_recent?(position)
+    @message += "該当のイベントはありませんでした…。" if @post_count == 0
     post_message(@message)
   end
 
@@ -65,7 +65,12 @@ class Seminar
     (1..7).map{ |day| (today + day).to_s.gsub("-","") }.join(",")
   end
 
-  def search_from_most_recent?(position)
-    position.to_i == 1
+  def invalid_limit?(limit:)
+    limit == 0
+  end
+
+  def too_popular_or_unpopular?(accepted:, limit:)
+    accepted_per_limit = accepted / limit.to_f
+    accepted_per_limit <= 0.7 || accepted_per_limit >= 1
   end
 end
