@@ -39,7 +39,7 @@ class Seminar
 
     events.each do |event|
       parse_connpass_info(event)
-      next if @waiting_count > 0 || @limit_count == 0
+      next if @waiting_count >= 0 || @limit_count == 0
       next if @accepted_count / @limit_count < 0.8
       @post_count += 1
       @message += "*" + @event_title + "* by " + @event_owner + "\n" + @event_url + "\n"
