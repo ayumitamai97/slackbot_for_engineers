@@ -66,6 +66,6 @@ class Seminar
   end
 
   def search_from_most_recent?(position)
-    position == 1
+    position.to_i == 1
   end
 end
