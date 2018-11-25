@@ -38,12 +38,12 @@ class Seminar
     events.each do |event|
       parse_connpass_info(event)
 
-      next if @event_address.match?(/#{region}/)
+      next unless @event_address.match?(/#{region}/)
       next if invalid_limit?(limit: @limit_count)
       next if too_popular_or_unpopular?(accepted: @accepted_count, limit: @limit_count)
 
       @post_count += 1
-      @message += "*#{@event_title}* (#{@event_date}) by #{@event_owner}\n#{@event_url}\n"
+      @message += "*#{@event_title}* (#{@event_date})\n#{@event_url}\n"
     end
 
     @message += "該当のイベントはありませんでした…。" if @post_count == 0
@@ -56,8 +56,6 @@ class Seminar
     @waiting_count = event["waiting"].to_i
     @limit_count = event["limit"].to_i
     @accepted_count = event["accepted"].to_i
-    @event_owner =
-      event["series"] ? event["series"]["title"] : event["owner_display_name"]
     @event_date = event["started_at"].to_date.to_s.gsub("-", "/")
     @event_address = event["address"]
   end
