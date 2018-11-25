@@ -9,7 +9,7 @@ class Seminar
 
   def get_connpass_info
     REGIONS.each do |region|
-      @message = region + "で1週間以内に開催される、人気(残席3割未満)のイベントをお知らせします :full_moon_with_face: \n"
+      @message = region + "で1週間以内に開催される、人気(残席2割未満)のイベントをお知らせします :full_moon_with_face: \n"
 
       encoded_uri =
         URI.encode("https://connpass.com/api/v1/event/?keyword=#{region}&ymd=#{dates}&count=100&order=2")
@@ -71,6 +71,6 @@ class Seminar
 
   def too_popular_or_unpopular?(accepted:, limit:)
     accepted_per_limit = accepted / limit.to_f
-    accepted_per_limit <= 0.7 || accepted_per_limit >= 1
+    accepted_per_limit <= 0.8 || accepted_per_limit >= 1
   end
 end
