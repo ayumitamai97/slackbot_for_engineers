@@ -5,7 +5,7 @@ require_relative "slack"
 
 class Seminar
   include Slack
-  REGIONS = %w(東京 大阪 福岡)
+  REGIONS = %w(東京 大阪)
 
   def get_connpass_info
     REGIONS.each do |region|
