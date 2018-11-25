@@ -16,7 +16,7 @@ class Seminar
 
       uri = URI.parse(encoded_uri)
       json = JSON.parse Net::HTTP.get_response(uri).body
-      notify_slack(json: json, message: @message)
+      notify_slack(json: json, message: @message, region: region)
     end
 
     # ENV["SLACK_MY_USER_ID"] のフォーマットは <@ABCDEFG12>
@@ -31,13 +31,14 @@ class Seminar
 
   private
 
-  def notify_slack(json:, message:)
+  def notify_slack(json:, message:, region:)
     events = json["events"]
     @post_count = 0
 
     events.each do |event|
       parse_connpass_info(event)
 
+      next if @event_address.match?(/#{region}/)
       next if invalid_limit?(limit: @limit_count)
       next if too_popular_or_unpopular?(accepted: @accepted_count, limit: @limit_count)
 
@@ -58,6 +59,7 @@ class Seminar
     @event_owner =
       event["series"] ? event["series"]["title"] : event["owner_display_name"]
     @event_date = event["started_at"].to_date.to_s.gsub("-", "/")
+    @event_address = event["address"]
   end
 
   def dates
