@@ -38,7 +38,7 @@ class Seminar
     events.each do |event|
       parse_connpass_info(event)
 
-      next unless @event_address.match?(/#{region}/)
+      next unless @event_address&.match?(/#{region}/)
       next if invalid_limit?(limit: @limit_count)
       next if too_popular_or_unpopular?(accepted: @accepted_count, limit: @limit_count)
 
